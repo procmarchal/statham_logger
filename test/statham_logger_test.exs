@@ -225,7 +225,6 @@ defmodule StathamLoggerTest do
         |> Jason.decode!()
 
       refute log["time"]
-      refute log["domain"]
       refute log["erl_level"]
       refute log["gl"]
 

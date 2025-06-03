@@ -6,7 +6,7 @@ defmodule StathamLogger.DatadogFormatter do
   [default standard attribute list](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#default-standard-attribute-list).
   """
 
-  @skipped_metadata_keys [:domain, :erl_level, :gl, :time]
+  @skipped_metadata_keys [:erl_level, :gl, :time, :sentry]
 
   @standard_attributes_list %{
     http: ~w(url status_code method referer request_id useragent)a,

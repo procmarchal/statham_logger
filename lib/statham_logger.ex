@@ -97,12 +97,14 @@ defmodule StathamLogger do
             ref: nil,
             exception_capture_plug_used?: true
 
+  @supported_device_ids [:stdio, :stderr]
+
   @impl true
   def init(__MODULE__) do
     config = config()
     device = Keyword.get(config, :device, :user)
 
-    if device_pid(device) do
+    if device_pid(device) || device in @supported_device_ids do
       {:ok, init(config, %__MODULE__{})}
     else
       {:error, :ignore}
@@ -253,7 +255,8 @@ defmodule StathamLogger do
         async_io(device, output)
 
       nil ->
-        raise "no device registered with the name #{inspect(name)}"
+        IO.puts(name, output)
+        nil
     end
   end
 
