@@ -25,7 +25,9 @@ defmodule StathamLogger.DatadogFormatter do
           hostname: node_hostname(),
           severity: Atom.to_string(level),
           timestamp: format_timestamp(timestamp)
-        }
+        },
+        name: "elixirs",
+        v: 0
       },
       skip_metadata_keys(sanitized_metadata)
     )

@@ -81,7 +81,7 @@ defmodule StathamLogger do
     ```
   """
 
-  alias StathamLogger.InkFormatter
+  alias StathamLogger.DatadogFormatter
   alias StathamLogger.Sanitizer
 
   @behaviour :gen_event
@@ -286,7 +286,7 @@ defmodule StathamLogger do
        ) do
     raw_metadata = Map.new(metadata)
     sanitized_metadata = Sanitizer.sanitize_metadata(raw_metadata, filter_keys, sanitize_options)
-    event = InkFormatter.format_event(level, message, timestamp, sanitized_metadata, raw_metadata)
+    event = DatadogFormatter.format_event(level, message, timestamp, sanitized_metadata, raw_metadata)
 
     [Jason.encode_to_iodata!(event) | "\n"]
   end
