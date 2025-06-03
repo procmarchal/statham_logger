@@ -6,7 +6,7 @@ defmodule StathamLogger.DatadogFormatter do
   [default standard attribute list](https://docs.datadoghq.com/logs/processing/attributes_naming_convention/#default-standard-attribute-list).
   """
 
-  @skipped_metadata_keys [:erl_level, :gl, :time, :sentry]
+  @skipped_metadata_keys [:domain, :erl_level, :gl, :time]
 
   @standard_attributes_list %{
     http: ~w(url status_code method referer request_id useragent)a,
@@ -25,29 +25,13 @@ defmodule StathamLogger.DatadogFormatter do
           hostname: node_hostname(),
           severity: Atom.to_string(level),
           timestamp: format_timestamp(timestamp)
-        },
-        name: "elixirs",
-        pid: System.pid() |> String.to_integer(),
-        hostname: node_hostname(),
-        msg: message,
-        time: format_timestamp(timestamp),
-        level: level(level, :bunyan),
-        v: 0
+        }
       },
       skip_metadata_keys(sanitized_metadata)
     )
     |> maybe_put(:error, format_error(raw_metadata))
     |> maybe_put(:usr, format_user(raw_metadata))
     |> maybe_put(:http, format_http(raw_metadata))
-  end
-
-  defp level(level, :bunyan) do
-    case level do
-      :debug -> 20
-      :info -> 30
-      :warn -> 40
-      :error -> 50
-    end
   end
 
   def format_captured_exception(message, timestamp, sanitized_metadata, raw_metadata) do
