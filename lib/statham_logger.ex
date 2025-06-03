@@ -39,7 +39,7 @@ defmodule StathamLogger do
       For example, given `max_string_size: 10` => "Lorem ipsu...".
 
     * `:device` - the device to log error messages to. Defaults to
-      `:user` but can be changed to something else such as `:standard_error` or `:standard_io`
+      `:user` but can be changed to something else such as `:standard_error`.
 
     * `:max_buffer` - maximum events to buffer while waiting
       for a confirmation from the IO device (default: 32).
@@ -81,7 +81,6 @@ defmodule StathamLogger do
     ```
   """
 
-  alias StathamLogger.DatadogFormatter
   alias StathamLogger.InkFormatter
   alias StathamLogger.Sanitizer
 
@@ -98,14 +97,12 @@ defmodule StathamLogger do
             ref: nil,
             exception_capture_plug_used?: true
 
-  @supported_device_ids [:stdio, :stderr]
-
   @impl true
   def init(__MODULE__) do
     config = config()
     device = Keyword.get(config, :device, :user)
 
-    if device_pid(device) || device in @supported_device_ids do
+    if Process.whereis(device) do
       {:ok, init(config, %__MODULE__{})}
     else
       {:error, :ignore}
@@ -116,9 +113,6 @@ defmodule StathamLogger do
     config = configure_merge(config(), opts)
     {:ok, init(config, %__MODULE__{})}
   end
-
-  defp device_pid(:standard_io), do: Process.group_leader()
-  defp device_pid(device), do: Process.whereis(device)
 
   @impl true
   def handle_call({:configure, options}, state) do
@@ -251,13 +245,12 @@ defmodule StathamLogger do
   end
 
   defp async_io(name, output) when is_atom(name) do
-    case device_pid(name) do
+    case Process.whereis(name) do
       device when is_pid(device) ->
         async_io(device, output)
 
       nil ->
-        IO.puts(name, output)
-        nil
+        raise "no device registered with the name #{inspect(name)}"
     end
   end
 
