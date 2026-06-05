@@ -38,16 +38,26 @@ defmodule StathamLogger.ExceptionLogger do
   end
 
   defp statham_logger_running? do
-    supervisor =
-      if Process.whereis(Logger.BackendSupervisor) do
-        Logger.BackendSupervisor
-      else
-        Logger.Backends.Supervisor
-      end
+    case backend_supervisor() do
+      nil ->
+        false
 
-    supervisor
-    |> Supervisor.which_children()
-    |> Enum.any?(fn spec -> elem(spec, 0) == StathamLogger end)
+      supervisor ->
+        supervisor
+        |> Supervisor.which_children()
+        |> Enum.any?(fn spec -> elem(spec, 0) == StathamLogger end)
+    end
+  end
+
+  # `Logger.Backends` was removed from Elixir's stdlib in 1.15 and extracted
+  # into the `:logger_backends` hex package, which registers its supervisor
+  # under a different name (`LoggerBackends.Supervisor`). The older built-in
+  # names are kept as fallbacks for projects still on Elixir < 1.15.
+  defp backend_supervisor do
+    Enum.find(
+      [LoggerBackends.Supervisor, Logger.Backends.Supervisor, Logger.BackendSupervisor],
+      &Process.whereis/1
+    )
   end
 
   # Code copied from `plug_cowboy` Plug.Cowboy.Translator START
