@@ -37,7 +37,7 @@ defmodule StathamLogger.InkFormatter do
   end
 
   defp base_map(message, timestamp, level) when is_list(message) do
-    base_map(IO.iodata_to_binary(message), timestamp, level)
+    base_map(IO.chardata_to_string(message), timestamp, level)
   end
 
   defp formatted_timestamp({date, {hours, minutes, seconds, milliseconds}}) do
